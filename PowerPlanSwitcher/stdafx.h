@@ -19,3 +19,9 @@
 
 
 // TODO: reference additional headers your program requires here
+#include <comdef.h>
+#include <Wbemidl.h>
+#include <string>
+#include <list>
+using namespace std;
+# pragma comment(lib, "wbemuuid.lib")

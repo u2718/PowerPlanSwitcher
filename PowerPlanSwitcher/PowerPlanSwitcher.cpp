@@ -3,7 +3,7 @@
 
 #include "stdafx.h"
 #include "PowerPlanSwitcher.h"
-#include "Switcher.h"
+#include "PowerPlan.h"
 
 #define MAX_LOADSTRING 100
 

@@ -33,6 +33,12 @@
     <ClInclude Include="Switcher.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="WMI.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PowerPlan.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -42,6 +48,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Switcher.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="WMI.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PowerPlan.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

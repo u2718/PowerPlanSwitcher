@@ -4,7 +4,7 @@ class Switcher
 public:
 	Switcher();
 	~Switcher();
-//private:
+private:
 	DWORD getIdleTime();
 };
 
