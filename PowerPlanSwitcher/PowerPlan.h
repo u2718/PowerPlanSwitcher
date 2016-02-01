@@ -4,10 +4,14 @@ class PowerPlan
 private:
 	wstring name_;
 	wstring id_;
+	bool is_active_;
+
 public:
-	PowerPlan(const wstring& name, const wstring& id);
+	PowerPlan(const wstring& name, const wstring& id, const bool is_active);
 	~PowerPlan();
 	bool activate();
 	static list<PowerPlan> get_list();
+
+	bool is_active();
 };
 

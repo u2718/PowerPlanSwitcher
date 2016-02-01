@@ -2,7 +2,7 @@
 #include "WMI.h"
 
 //https://msdn.microsoft.com/ru-ru/library/windows/desktop/aa390423%28v=vs.85%29.asp
-list<tuple<wstring, wstring>> WMI::execute(const wstring& root, const wstring& query, const tuple<const wstring&, const wstring&>& names)
+list<tuple<wstring, wstring, bool>> WMI::execute(const wstring& root, const wstring& query, const tuple<const wstring&, const wstring&, const wstring&>& names)
 {
 	HRESULT hres;
 	// Step 1: --------------------------------------------------
@@ -128,7 +128,7 @@ list<tuple<wstring, wstring>> WMI::execute(const wstring& root, const wstring& q
 	IWbemClassObject *pclsObj = NULL;
 	ULONG uReturn = 0;
 
-	list<tuple<wstring, wstring>> result;
+	list<tuple<wstring, wstring, bool>> result;
 	while (pEnumerator)
 	{
 		HRESULT hr = pEnumerator->Next(WBEM_INFINITE, 1,
@@ -145,8 +145,10 @@ list<tuple<wstring, wstring>> WMI::execute(const wstring& root, const wstring& q
 		auto t0 = wstring(vtProp.bstrVal, SysStringLen(vtProp.bstrVal));
 		hr = pclsObj->Get(get<1>(names).c_str(), 0, &vtProp, 0, 0);
 		auto t1 = wstring(vtProp.bstrVal, SysStringLen(vtProp.bstrVal));
+		hr = pclsObj->Get(get<2>(names).c_str(), 0, &vtProp, 0, 0);
+		auto t2 = vtProp.boolVal;
 
-		result.push_back(make_tuple(t0, t1));
+		result.push_back(make_tuple(t0, t1, t2));
 		VariantClear(&vtProp);
 
 		pclsObj->Release();
