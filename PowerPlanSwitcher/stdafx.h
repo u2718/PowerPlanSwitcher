@@ -23,5 +23,6 @@
 #include <Wbemidl.h>
 #include <string>
 #include <list>
+#include <tuple>
 using namespace std;
 # pragma comment(lib, "wbemuuid.lib")

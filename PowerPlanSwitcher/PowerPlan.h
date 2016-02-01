@@ -1,9 +1,13 @@
 #pragma once
 class PowerPlan
 {
+private:
+	wstring name_;
+	wstring id_;
 public:
-	PowerPlan();
+	PowerPlan(const wstring& name, const wstring& id);
 	~PowerPlan();
-	static list<wstring> getList();
+	bool activate();
+	static list<PowerPlan> get_list();
 };
 
