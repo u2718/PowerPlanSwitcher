@@ -24,5 +24,9 @@
 #include <string>
 #include <list>
 #include <tuple>
+#include <thread>
+#include <map>
+#include <algorithm>
+#include <iterator>
 using namespace std;
 # pragma comment(lib, "wbemuuid.lib")
