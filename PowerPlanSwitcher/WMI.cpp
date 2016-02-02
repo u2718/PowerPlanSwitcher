@@ -1,23 +1,11 @@
 #include "stdafx.h"
 #include "WMI.h"
 
-//https://msdn.microsoft.com/ru-ru/library/windows/desktop/aa390423%28v=vs.85%29.asp
-list<tuple<wstring, wstring, bool>> WMI::execute(const wstring& root, const wstring& query, const tuple<const wstring&, const wstring&, const wstring&>& names)
+bool WMI::is_security_initialized_ = false;
+
+void WMI::init_security()
 {
-	HRESULT hres;
-	// Step 1: --------------------------------------------------
-	// Initialize COM. ------------------------------------------
-
-	hres = CoInitializeEx(0, COINIT_MULTITHREADED);
-	if (FAILED(hres))
-	{
-		throw exception();                  // Program has failed.
-	}
-
-	// Step 2: --------------------------------------------------
-	// Set general COM security levels --------------------------
-
-	hres = CoInitializeSecurity(
+	auto hres = CoInitializeSecurity(
 		NULL,
 		-1,                          // COM authentication
 		NULL,                        // Authentication services
@@ -34,6 +22,30 @@ list<tuple<wstring, wstring, bool>> WMI::execute(const wstring& root, const wstr
 	{
 		CoUninitialize();
 		throw exception();           // Program has failed.
+	}
+
+	is_security_initialized_ = true;
+}
+
+//https://msdn.microsoft.com/ru-ru/library/windows/desktop/aa390423%28v=vs.85%29.asp
+list<tuple<wstring, wstring, bool>> WMI::execute(const wstring& root, const wstring& query, const tuple<const wstring&, const wstring&, const wstring&>& names)
+{
+	HRESULT hres;
+	// Step 1: --------------------------------------------------
+	// Initialize COM. ------------------------------------------
+
+	hres = CoInitializeEx(0, COINIT_MULTITHREADED);
+	if (FAILED(hres))
+	{
+		throw exception();                  // Program has failed.
+	}
+
+	// Step 2: --------------------------------------------------
+	// Set general COM security levels --------------------------
+
+	if (!is_security_initialized_)
+	{
+		init_security();
 	}
 
 	// Step 3: ---------------------------------------------------
@@ -180,24 +192,9 @@ bool WMI::call(const wstring& root, const wstring& query, const wstring& method)
 
 	// Step 2: --------------------------------------------------
 	// Set general COM security levels --------------------------
-
-	hres = CoInitializeSecurity(
-		NULL,
-		-1,                          // COM negotiates service
-		NULL,                        // Authentication services
-		NULL,                        // Reserved
-		RPC_C_AUTHN_LEVEL_DEFAULT,   // Default authentication 
-		RPC_C_IMP_LEVEL_IMPERSONATE, // Default Impersonation
-		NULL,                        // Authentication info
-		EOAC_NONE,                   // Additional capabilities 
-		NULL                         // Reserved
-		);
-
-
-	if (FAILED(hres))
+	if (!is_security_initialized_)
 	{
-		CoUninitialize();
-		throw exception();                   // Program has failed.
+		init_security();
 	}
 
 	// Step 3: ---------------------------------------------------

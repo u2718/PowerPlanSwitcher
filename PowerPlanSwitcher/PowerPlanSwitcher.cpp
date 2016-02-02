@@ -3,7 +3,7 @@
 
 #include "stdafx.h"
 #include "PowerPlanSwitcher.h"
-#include "PowerPlan.h"
+#include "Switcher.h"
 
 #define MAX_LOADSTRING 100
 
@@ -11,7 +11,8 @@
 HINSTANCE hInst;                                // current instance
 WCHAR szTitle[MAX_LOADSTRING];                  // The title bar text
 WCHAR szWindowClass[MAX_LOADSTRING];            // the main window class name
-
+shared_ptr<Switcher> switcher;
+shared_ptr<thread> switcherThread;
 // Forward declarations of functions included in this code module:
 ATOM                MyRegisterClass(HINSTANCE hInstance);
 BOOL                InitInstance(HINSTANCE, int);
@@ -129,6 +130,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	{
 	case WM_CREATE:
 	{
+		switcher = make_shared<Switcher>();
+		switcherThread = make_shared<thread>([] {switcher->run(); });
 		return DefWindowProc(hWnd, message, wParam, lParam);
 	}
 	case WM_COMMAND:
@@ -141,6 +144,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
 			break;
 		case IDM_EXIT:
+			
 			DestroyWindow(hWnd);
 			break;
 		default:
@@ -157,6 +161,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	}
 	break;
 	case WM_DESTROY:
+		switcher->stop();
+		switcherThread->detach();
 		PostQuitMessage(0);
 		break;
 	default:

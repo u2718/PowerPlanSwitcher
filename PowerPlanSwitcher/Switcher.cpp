@@ -3,17 +3,12 @@
 
 Switcher::Switcher()
 {
-	for each (auto plan in PowerPlan::get_list())
-	{
-		if (plan->get_name() == idle_name)
-		{
-			idle = plan;
-		}
-		else if (plan->get_name() == active_name)
-		{
-			active = plan;
-		}
-	}
+	idle_ = PowerPlan::get(idle_name_);
+	active_ = PowerPlan::get(active_name_);
+	set_check_delay_active(10);
+	set_check_delay_idle(5);
+	set_idle_time(30);
+	current_check_delay_ = get_check_delay_active();
 }
 
 Switcher::~Switcher()
@@ -22,27 +17,84 @@ Switcher::~Switcher()
 
 void Switcher::run()
 {
-	while (true)
+	while (!is_stopped_)
 	{
-		if (getIdleTime() > 10)
+		if (get_last_input_time() > get_idle_time())
 		{
-			if (!idle->is_active())
+			if (!idle_->is_active())
 			{
-				idle->activate();
+				idle_->activate();
+				current_check_delay_ = get_check_delay_idle() * 1000;
 			}
 		}
 		else
 		{
-			if (!active->is_active())
+			if (!active_->is_active())
 			{
-				active->activate();
+				active_->activate();
+				current_check_delay_ = get_check_delay_active() * 1000;
 			}
 		}
-		Sleep(5000);
+		Sleep(current_check_delay_);
 	}
 }
 
-DWORD Switcher::getIdleTime()
+void Switcher::stop()
+{
+	is_stopped_ = true;
+}
+
+wstring Switcher::get_idle_name()
+{
+	return idle_name_;
+}
+
+void Switcher::set_idle_name(const wstring & name)
+{
+	idle_name_ = name;
+}
+
+wstring Switcher::get_active_name()
+{
+	return active_name_;
+}
+
+void Switcher::set_active_name(const wstring & name)
+{
+	active_name_ = name;
+}
+
+unsigned int Switcher::get_idle_time()
+{
+	return idle_time_;
+}
+
+void Switcher::set_idle_time(unsigned int time)
+{
+	idle_time_ = time;
+}
+
+unsigned int Switcher::get_check_delay_idle()
+{
+	return check_delay_idle_;
+}
+
+void Switcher::set_check_delay_idle(unsigned int delay)
+{
+	check_delay_idle_ = delay;
+}
+
+unsigned int Switcher::get_check_delay_active()
+{
+	return check_delay_active_;
+}
+
+void Switcher::set_check_delay_active(unsigned int delay)
+{
+	check_delay_active_ = delay;
+}
+
+DWORD Switcher::get_last_input_time()
 {
 	DWORD idleTime = 0;
 	LASTINPUTINFO lastInputInfo;
