@@ -131,6 +131,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	case WM_CREATE:
 	{
 		switcher = make_shared<Switcher>();
+		switcher->add_exclusion_process(L"vlc.exe");
 		switcherThread = make_shared<thread>([] {switcher->run(); });
 		return DefWindowProc(hWnd, message, wParam, lParam);
 	}

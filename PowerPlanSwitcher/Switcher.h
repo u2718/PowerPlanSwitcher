@@ -1,5 +1,6 @@
 #pragma once
 #include "PowerPlan.h"
+#include "ProcessList.h"
 
 class Switcher
 {
@@ -16,6 +17,8 @@ private:
 
 	shared_ptr<PowerPlan> idle_;
 	shared_ptr<PowerPlan> active_;
+
+	list<wstring> exclusion_processes_;
 public:
 	Switcher();
 	~Switcher();
@@ -36,6 +39,10 @@ public:
 
 	unsigned int get_check_delay_active();
 	void set_check_delay_active(unsigned int delay);
+
+	list<wstring> get_exclude_processes();
+	void add_exclusion_process(const wstring &process_name);
+	void remove_exclusion_process(const wstring &process_name);
 private:
 	DWORD get_last_input_time();
 };

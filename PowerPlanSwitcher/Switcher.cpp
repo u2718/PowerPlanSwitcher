@@ -5,9 +5,9 @@ Switcher::Switcher()
 {
 	idle_ = PowerPlan::get(idle_name_);
 	active_ = PowerPlan::get(active_name_);
-	set_check_delay_active(10);
+	set_check_delay_active(60);
 	set_check_delay_idle(5);
-	set_idle_time(30);
+	set_idle_time(300);
 	current_check_delay_ = get_check_delay_active();
 }
 
@@ -21,7 +21,7 @@ void Switcher::run()
 	{
 		if (get_last_input_time() > get_idle_time())
 		{
-			if (!idle_->is_active())
+			if (!idle_->is_active() && !ProcessList::any_of_process_is_running(exclusion_processes_))
 			{
 				idle_->activate();
 				current_check_delay_ = get_check_delay_idle() * 1000;
@@ -92,6 +92,21 @@ unsigned int Switcher::get_check_delay_active()
 void Switcher::set_check_delay_active(unsigned int delay)
 {
 	check_delay_active_ = delay;
+}
+
+list<wstring> Switcher::get_exclude_processes()
+{
+	return exclusion_processes_;
+}
+
+void Switcher::add_exclusion_process(const wstring & process_name)
+{
+	exclusion_processes_.push_back(process_name);
+}
+
+void Switcher::remove_exclusion_process(const wstring & process_name)
+{
+	exclusion_processes_.remove(process_name);
 }
 
 DWORD Switcher::get_last_input_time()
