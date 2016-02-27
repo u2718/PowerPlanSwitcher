@@ -13,6 +13,10 @@ WCHAR szTitle[MAX_LOADSTRING];                  // The title bar text
 WCHAR szWindowClass[MAX_LOADSTRING];            // the main window class name
 shared_ptr<Switcher> switcher;
 shared_ptr<thread> switcherThread;
+HMENU hTrayMenu;
+HMENU hTrayPopupMenu;
+NOTIFYICONDATA nid = {};
+
 // Forward declarations of functions included in this code module:
 ATOM                MyRegisterClass(HINSTANCE hInstance);
 BOOL                InitInstance(HINSTANCE, int);
@@ -108,9 +112,6 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 		return FALSE;
 	}
 
-	ShowWindow(hWnd, nCmdShow);
-	UpdateWindow(hWnd);
-
 	return TRUE;
 }
 
@@ -133,6 +134,19 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		switcher = make_shared<Switcher>();
 		switcher->add_exclusion_process(L"vlc.exe");
 		switcherThread = make_shared<thread>([] {switcher->run(); });
+
+		hTrayMenu = LoadMenu(hInst, MAKEINTRESOURCE(IDR_TRAY));
+		hTrayPopupMenu = GetSubMenu(hTrayMenu, 0);
+
+		ZeroMemory(&nid, sizeof(NOTIFYICONDATA));
+		nid.cbSize = sizeof(nid);
+		nid.hWnd = hWnd;
+		nid.uFlags = NIF_ICON | NIF_MESSAGE;
+		nid.hIcon = LoadIcon(hInst, MAKEINTRESOURCE(IDI_POWERPLANSWITCHER));
+		nid.uCallbackMessage = WM_USER;
+		nid.uID = IDI_POWERPLANSWITCHER;
+		Shell_NotifyIcon(NIM_ADD, &nid);
+
 		return DefWindowProc(hWnd, message, wParam, lParam);
 	}
 	case WM_COMMAND:
@@ -144,10 +158,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		case IDM_ABOUT:
 			DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
 			break;
+		case ID_TRAY_EXIT:
 		case IDM_EXIT:
-			
 			DestroyWindow(hWnd);
 			break;
+		
 		default:
 			return DefWindowProc(hWnd, message, wParam, lParam);
 		}
@@ -161,9 +176,20 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		EndPaint(hWnd, &ps);
 	}
 	break;
+	case WM_USER:
+		if (lParam == WM_RBUTTONDOWN)
+		{
+			POINT p;
+			GetCursorPos(&p);
+			TrackPopupMenu(hTrayPopupMenu, TPM_LEFTALIGN | TPM_BOTTOMALIGN, p.x, p.y, 0, hWnd, 0);
+			break;
+		}
+		break;
 	case WM_DESTROY:
 		switcher->stop();
 		switcherThread->detach();
+		Shell_NotifyIcon(NIM_DELETE, &nid);
+		DestroyMenu(hTrayMenu);
 		PostQuitMessage(0);
 		break;
 	default:
